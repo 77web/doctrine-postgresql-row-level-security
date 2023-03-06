@@ -1,0 +1,23 @@
+{
+    "name": "linkage/doctrine-row-level-security",
+    "type": "library",
+    "require": {
+        "doctrine/dbal": "^3.6",
+        "doctrine/orm": "^2.14"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Linkage\\DoctrineRowLevelSecurity\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Hiromi Hishida",
+            "email": "hiromi-hishida@linkage-inc.co.jp"
+        }
+    ]
+}
