@@ -19,7 +19,7 @@ class RowLevelSecuritySqlFactory
     }
 
     /**
-     * @return array
+     * @return array<string>
      */
     public function createDisableSqls(string $policy, string $table): array
     {

@@ -14,6 +14,9 @@ class RowLevelSecurityAwareSchemaDiff
     ) {
     }
 
+    /**
+     * @return array<string>
+     */
     public function toSql(AbstractPlatform $platform): array
     {
         $rlsSqls = [];
