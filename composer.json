@@ -7,7 +7,9 @@
         "php": ">=8.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0"
+        "phpunit/phpunit": "^10.0",
+        "friendsofphp/php-cs-fixer": "^3.15",
+        "phpstan/phpstan": "^1.10"
     },
     "license": "MIT",
     "autoload": {
@@ -20,5 +22,16 @@
             "name": "Hiromi Hishida",
             "email": "hiromi-hishida@linkage-inc.co.jp"
         }
-    ]
+    ],
+    "scripts": {
+        "cs": [
+            "@php ./vendor/bin/php-cs-fixer fix -v --dry-run"
+        ],
+        "cs-fix": [
+            "@php ./vendor/bin/php-cs-fixer fix -v"
+        ],
+        "phpstan": [
+            "@php ./vendor/bin/phpstan"
+        ]
+    }
 }
