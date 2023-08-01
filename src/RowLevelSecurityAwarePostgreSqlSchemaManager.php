@@ -7,6 +7,7 @@ namespace Linkage\DoctrineRowLevelSecurity;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\PostgreSqlSchemaManager;
 use Doctrine\DBAL\Schema\Table;
 
@@ -53,7 +54,7 @@ EOQ;
         return $table;
     }
 
-    public function createComparator(): RowLevelSecurityAwareComparator
+    public function createComparator(): Comparator
     {
         return new RowLevelSecurityAwareComparator();
     }

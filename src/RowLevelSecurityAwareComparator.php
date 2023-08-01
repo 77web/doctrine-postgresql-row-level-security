@@ -11,7 +11,7 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
 
-class RowLevelSecurityAwareComparator
+class RowLevelSecurityAwareComparator extends Comparator
 {
     private readonly Comparator $delegate;
 
@@ -44,7 +44,7 @@ class RowLevelSecurityAwareComparator
 
     public function compareTable(Table $fromTable, Table $toTable): TableDiff
     {
-        $baseTableDiff = $this->delegate->compareTables($fromTable, $toTable);
+        $baseTableDiff = $this->delegate->compareTable($fromTable, $toTable);
 
         if ($toTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME) && !$fromTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME)) {
             // RLSがなかったテーブルにRLSを足した時
