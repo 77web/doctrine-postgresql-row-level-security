@@ -33,7 +33,7 @@ class RowLevelSecurityAwareComparator extends Comparator
             }
             $tableDiff = $this->compareTable($fromTable, $toTable);
             if ($tableDiff instanceof RowLevelSecurityAwareTableDiff) {
-                $baseDiff->changedTables[$tableDiff->getOldTable()] = $tableDiff;
+                $baseDiff->changedTables[$tableDiff->getOldTable()->getName()] = $tableDiff;
                 $hasRlsDiff = true;
             }
         }

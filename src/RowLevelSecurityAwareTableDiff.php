@@ -15,7 +15,7 @@ class RowLevelSecurityAwareTableDiff extends TableDiff
         TableDiff $baseDiff,
     ) {
         parent::__construct(
-            $baseDiff->name,
+            $baseDiff->getOldTable()->getName(),
             $baseDiff->addedColumns,
             $baseDiff->changedColumns,
             $baseDiff->removedColumns,
@@ -37,7 +37,7 @@ class RowLevelSecurityAwareTableDiff extends TableDiff
             $using = $this->addedRowLevelSecurity['using'] ?? '## TODO 手動設定要 ##';
             return $sqlFactory->createEnableSqls(
                 $this->addedRowLevelSecurity['name'],
-                $this->name,
+                $this->getOldTable()->getName(),
                 $this->addedRowLevelSecurity['role'],
                 $using,
             );
@@ -45,7 +45,7 @@ class RowLevelSecurityAwareTableDiff extends TableDiff
         if ($this->removedRowLevelSecurity !== null) {
             return $sqlFactory->createDisableSqls(
                 $this->removedRowLevelSecurity['name'],
-                $this->name,
+                $this->getOldTable()->getName(),
             );
         }
 
