@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Linkage\DoctrineRowLevelSecurity;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\SchemaDiff;
@@ -13,16 +14,14 @@ use Doctrine\DBAL\Schema\TableDiff;
 
 class RowLevelSecurityAwareComparator extends Comparator
 {
-    private readonly Comparator $delegate;
-
-    public function __construct()
+    public function __construct(AbstractPlatform $platform)
     {
-        $this->delegate = new Comparator();
+        parent::__construct($platform);
     }
 
     public function compareSchemas(Schema $fromSchema, Schema $toSchema): RowLevelSecurityAwareSchemaDiff|SchemaDiff
     {
-        $baseDiff = $this->delegate->compareSchemas($fromSchema, $toSchema);
+        $baseDiff = parent::compareSchemas($fromSchema, $toSchema);
 
         $hasRlsDiff = false;
         foreach ($toSchema->getTables() as $toTable) {
@@ -34,7 +33,7 @@ class RowLevelSecurityAwareComparator extends Comparator
             }
             $tableDiff = $this->compareTable($fromTable, $toTable);
             if ($tableDiff instanceof RowLevelSecurityAwareTableDiff) {
-                $baseDiff->changedTables[$tableDiff->name] = $tableDiff;
+                $baseDiff->changedTables[$tableDiff->getOldTable()] = $tableDiff;
                 $hasRlsDiff = true;
             }
         }
@@ -44,7 +43,7 @@ class RowLevelSecurityAwareComparator extends Comparator
 
     public function compareTable(Table $fromTable, Table $toTable): TableDiff
     {
-        $baseTableDiff = $this->delegate->compareTable($fromTable, $toTable);
+        $baseTableDiff = parent::compareTable($fromTable, $toTable);
 
         if ($toTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME) && !$fromTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME)) {
             // RLSがなかったテーブルにRLSを足した時
