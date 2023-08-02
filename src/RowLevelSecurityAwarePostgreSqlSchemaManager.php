@@ -6,16 +6,19 @@ namespace Linkage\DoctrineRowLevelSecurity;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\PostgreSqlSchemaManager;
 use Doctrine\DBAL\Schema\Table;
 
 class RowLevelSecurityAwarePostgreSqlSchemaManager extends PostgreSqlSchemaManager
 {
     public function __construct(
-        Connection $conn
+        Connection $conn,
+        AbstractPlatform $platform,
     ) {
-        parent::__construct($conn);
+        parent::__construct($conn, $platform);
     }
 
     public function listTableDetails($name): Table
@@ -53,8 +56,8 @@ EOQ;
         return $table;
     }
 
-    public function createComparator(): RowLevelSecurityAwareComparator
+    public function createComparator(): Comparator
     {
-        return new RowLevelSecurityAwareComparator();
+        return new RowLevelSecurityAwareComparator($this->_platform);
     }
 }

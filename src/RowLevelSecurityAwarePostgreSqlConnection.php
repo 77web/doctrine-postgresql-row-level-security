@@ -11,6 +11,6 @@ class RowLevelSecurityAwarePostgreSqlConnection extends Connection
 {
     public function getSchemaManager(): AbstractSchemaManager
     {
-        return new RowLevelSecurityAwarePostgreSqlSchemaManager($this);
+        return new RowLevelSecurityAwarePostgreSqlSchemaManager($this, $this->getDatabasePlatform());
     }
 }

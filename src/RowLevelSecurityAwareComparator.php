@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Linkage\DoctrineRowLevelSecurity;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\SchemaDiff;
@@ -11,18 +12,16 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
 
-class RowLevelSecurityAwareComparator
+class RowLevelSecurityAwareComparator extends Comparator
 {
-    private readonly Comparator $delegate;
-
-    public function __construct()
+    public function __construct(AbstractPlatform $platform)
     {
-        $this->delegate = new Comparator();
+        parent::__construct($platform);
     }
 
     public function compareSchemas(Schema $fromSchema, Schema $toSchema): RowLevelSecurityAwareSchemaDiff|SchemaDiff
     {
-        $baseDiff = $this->delegate->compare($fromSchema, $toSchema);
+        $baseDiff = parent::compareSchemas($fromSchema, $toSchema);
 
         $hasRlsDiff = false;
         foreach ($toSchema->getTables() as $toTable) {
@@ -32,9 +31,9 @@ class RowLevelSecurityAwareComparator
                 // 新規テーブルは差分がある扱いなのでcreateのイベントリスナに任せる
                 continue;
             }
-            $tableDiff = $this->diffTable($fromTable, $toTable);
+            $tableDiff = $this->compareTable($fromTable, $toTable);
             if ($tableDiff instanceof RowLevelSecurityAwareTableDiff) {
-                $baseDiff->changedTables[$tableDiff->name] = $tableDiff;
+                $baseDiff->changedTables[$tableDiff->getOldTable()->getName()] = $tableDiff;
                 $hasRlsDiff = true;
             }
         }
@@ -42,13 +41,12 @@ class RowLevelSecurityAwareComparator
         return $hasRlsDiff ? new RowLevelSecurityAwareSchemaDiff($baseDiff) : $baseDiff;
     }
 
-    public function diffTable(Table $fromTable, Table $toTable): TableDiff|bool
+    public function compareTable(Table $fromTable, Table $toTable): TableDiff
     {
-        $baseDiff = $this->delegate->diffTable($fromTable, $toTable);
+        $baseTableDiff = parent::compareTable($fromTable, $toTable);
 
         if ($toTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME) && !$fromTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME)) {
             // RLSがなかったテーブルにRLSを足した時
-            $baseTableDiff = $baseDiff instanceof TableDiff ? $baseDiff : new TableDiff($toTable->getName(), fromTable: $fromTable);
             $rlsTableDiff = new RowLevelSecurityAwareTableDiff($baseTableDiff);
             $rlsTableDiff->addedRowLevelSecurity = $toTable->getOption(RowLevelSecurityConfig::RLS_OPTION_NAME);
 
@@ -56,13 +54,12 @@ class RowLevelSecurityAwareComparator
         }
         if (!$toTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME) && $fromTable->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME)) {
             // RLSがあったテーブルのRLSを消した時
-            $baseTableDiff = $baseDiff instanceof TableDiff ? $baseDiff : new TableDiff($toTable->getName(), fromTable: $fromTable);
             $rlsTableDiff = new RowLevelSecurityAwareTableDiff($baseTableDiff);
             $rlsTableDiff->removedRowLevelSecurity = $fromTable->getOption(RowLevelSecurityConfig::RLS_OPTION_NAME);
 
             return $rlsTableDiff;
         }
 
-        return $baseDiff;
+        return $baseTableDiff;
     }
 }
