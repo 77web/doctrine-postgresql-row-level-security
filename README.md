@@ -13,5 +13,5 @@ There are 3 required options for RowLevelSecurity attribute:
 - using: a sql clause which describes the role's access condition
 
 Then you can use doctrine:migrations:diff or doctrine:schema:create command as usual.
-SQL to enable Row Level Security will be appear in your migration files or be executed on schema creation.
+SQL to enable Row Level Security will appear in your migration files or be executed on schema creation.
 
