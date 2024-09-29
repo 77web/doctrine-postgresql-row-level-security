@@ -1,2 +1,2 @@
-drop table dog;
-drop table "user";
+drop table if exists dog;
+drop table if exists dog_owner;
