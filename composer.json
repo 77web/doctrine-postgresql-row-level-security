@@ -17,6 +17,11 @@
             "Linkage\\DoctrineRowLevelSecurity\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Linkage\\DoctrineRowLevelSecurity\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Hiromi Hishida",
