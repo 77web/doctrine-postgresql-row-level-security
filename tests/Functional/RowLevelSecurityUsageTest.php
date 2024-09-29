@@ -11,6 +11,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
+use Linkage\DoctrineRowLevelSecurity\RowLevelSecurityAwarePostgreSqlConnection;
+use Linkage\DoctrineRowLevelSecurity\RowLevelSecurityListener;
 use Linkage\DoctrineRowLevelSecurity\Tests\Entity\Dog;
 use Linkage\DoctrineRowLevelSecurity\Tests\Entity\DogOwner;
 use PHPUnit\Framework\TestCase;
@@ -28,6 +30,7 @@ class RowLevelSecurityUsageTest extends TestCase
             'password' => 'password',
             'host' => 'localhost',
             'driver' => 'pdo_pgsql',
+            'wrapperClass' => RowLevelSecurityAwarePostgreSqlConnection::class,
         ];
         $conn = DriverManager::getConnection($connectionParams);
         foreach (explode(';', (string) file_get_contents(__DIR__ . '/drop_table.sql')) as $dropSql) {
@@ -53,17 +56,22 @@ class RowLevelSecurityUsageTest extends TestCase
             $configuration,
             new EventManager(),
         );
+        $this->em->getEventManager()->addEventSubscriber(new RowLevelSecurityListener());
     }
 
     public function testCreateSchema(): void
     {
         $schemaTool = new SchemaTool($this->em);
+        $this->em->getConnection()->getDatabasePlatform()->setEventManager($this->em->getEventManager());
         $classMetadataFactory = new ClassMetadataFactory();
         $classMetadataFactory->setEntityManager($this->em);
         $sql = $schemaTool->getCreateSchemaSql([
             $classMetadataFactory->getMetadataFor(DogOwner::class),
             $classMetadataFactory->getMetadataFor(Dog::class),
         ]);
-        var_dump($sql);
+
+        $this->assertContains('CREATE POLICY dog_policy ON Dog TO dog_owner USING (owner_id = current_user::uuid)', $sql);
+        $this->assertContains('GRANT ALL ON TABLE Dog TO dog_owner', $sql);
+        $this->assertContains('ALTER TABLE Dog ENABLE ROW LEVEL SECURITY', $sql);
     }
 }
