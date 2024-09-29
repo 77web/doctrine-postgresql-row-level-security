@@ -9,14 +9,8 @@ use Doctrine\DBAL\Schema\AbstractSchemaManager;
 
 class RowLevelSecurityAwarePostgreSqlConnection extends Connection
 {
-    public function createSchemaManager(): AbstractSchemaManager
-    {
-        return new RowLevelSecurityAwarePostgreSqlSchemaManager($this, $this->getDatabasePlatform());
-    }
-
-    // @deprecated
     public function getSchemaManager(): AbstractSchemaManager
     {
-        return $this->createSchemaManager();
+        return new RowLevelSecurityAwarePostgreSqlSchemaManager($this, $this->getDatabasePlatform());
     }
 }
