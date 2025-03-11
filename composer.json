@@ -3,7 +3,7 @@
     "type": "library",
     "require": {
         "doctrine/dbal": "^3.0",
-        "doctrine/orm": "^2.14",
+        "doctrine/orm": "^3.1",
         "php": ">=8.2"
     },
     "require-dev": {
