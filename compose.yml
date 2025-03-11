@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15.0-alpine
+    environment:
+      TZ: Asia/Tokyo
+      POSTGRES_DB: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --locale=C
+    ports:
+      - "5432:5432"
