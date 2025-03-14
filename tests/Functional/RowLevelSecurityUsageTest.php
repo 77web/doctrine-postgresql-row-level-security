@@ -20,7 +20,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class RowLevelSecurityUsageTest extends TestCase
 {
-    private Connection $conn;
+    private EntityManager $em;
 
     protected function setUp(): void
     {
@@ -62,7 +62,6 @@ class RowLevelSecurityUsageTest extends TestCase
     public function testCreateSchema(): void
     {
         $schemaTool = new SchemaTool($this->em);
-        $this->em->getConnection()->getDatabasePlatform()->setEventManager($this->em->getEventManager());
         $classMetadataFactory = new ClassMetadataFactory();
         $classMetadataFactory->setEntityManager($this->em);
         $sql = $schemaTool->getCreateSchemaSql([

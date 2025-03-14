@@ -18,7 +18,6 @@ class RowLevelSecurityListener implements EventSubscriber
     {
         return [
             ToolEvents::postGenerateSchemaTable,
-            Events::onSchemaCreateTableColumn,
         ];
     }
 
@@ -30,26 +29,5 @@ class RowLevelSecurityListener implements EventSubscriber
         }
         $table = $args->getClassTable();
         $table->addOption(RowLevelSecurityConfig::RLS_OPTION_NAME, $rlsAttributes[array_key_first($rlsAttributes)]->getArguments());
-    }
-
-    public function onSchemaCreateTableColumn(SchemaCreateTableColumnEventArgs $args): void
-    {
-        // 本当はonSchemaCreateTableにフックしたいがDoctrine側の事情でCreateTableEventArgsのsqlはcreate tableのSQLを含めないといけないのでデフォルトのcreate tableのSQLにアドオンできるColumnのイベントを利用
-        if (!$args->getTable()->hasOption(RowLevelSecurityConfig::RLS_OPTION_NAME) || $args->getTable()->hasOption(self::RLS_VISITED_OPTION_NAME)) {
-            return;
-        }
-        $table = $args->getTable();
-        $rlsOptions = $table->getOption(RowLevelSecurityConfig::RLS_OPTION_NAME);
-        $policyName = $rlsOptions['name'] ?? sprintf('%s_policy', $table->getName());
-        $tableName = $table->getQuotedName($args->getPlatform());
-        $roleName = $rlsOptions['role'];
-        $using = $rlsOptions['using'];
-
-        $sqlFactory = new RowLevelSecuritySqlFactory();
-        foreach ($sqlFactory->createEnableSqls($policyName, $tableName, $roleName, $using) as $sql) {
-            $args->addSql($sql);
-        }
-
-        $table->addOption(self::RLS_VISITED_OPTION_NAME, true);
     }
 }
